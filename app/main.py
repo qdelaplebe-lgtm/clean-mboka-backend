@@ -5,9 +5,10 @@ from datetime import datetime
 import os
 
 from app.database import engine, Base
-from models import user, report, subscription
-from api import auth, reports, users, geo, tasks, subscriptions
-from core.config import settings
+from app.models import user, report, subscription
+from app.api import auth, reports, users, geo, tasks, subscriptions
+from app.core.config import settings
+
 
 app = FastAPI(
     title="Clean Mboka API",
