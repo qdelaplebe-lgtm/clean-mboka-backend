@@ -1,8 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from .config import settings  # Assurez-vous que le chemin est correct : .config ou ..config selon votre structure
-
+from core.config import settings
 # --- CONNEXION À LA BASE DE DONNÉES ---
 DATABASE_URL = settings.DATABASE_URL
 
