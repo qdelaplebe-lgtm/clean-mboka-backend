@@ -1,23 +1,32 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from .core.config import settings
+from .config import settings  # Assurez-vous que le chemin est correct : .config ou ..config selon votre structure
 
-# --- CONNEXION DB ---
-# On utilise les settings depuis le fichier de config
+# --- CONNEXION À LA BASE DE DONNÉES ---
 DATABASE_URL = settings.DATABASE_URL
 
-engine = create_engine(DATABASE_URL)
+# Création du moteur SQLAlchemy
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True  # Vérifie la connexion avant utilisation
+)
+
+# Création d'une session locale
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Base pour les modèles
 Base = declarative_base()
 
 # --- IMPORT DES MODÈLES ---
-# Indispensable pour que Base.metadata.create_all sache ce qu'il doit créer
+# Indispensable pour que Base.metadata.create_all sache quelles tables créer
 from .models import user, report, subscription
 
-# --- GESTIONNAIRE DE SESSION (CE QUI MANQUAIT) ---
+# --- GESTIONNAIRE DE SESSION ---
 def get_db():
+    """
+    Fonction à utiliser avec Depends() dans FastAPI
+    """
     db = SessionLocal()
     try:
         yield db
