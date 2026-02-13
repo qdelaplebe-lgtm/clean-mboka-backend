@@ -1480,20 +1480,20 @@ def create_report(
             folder="reports"
         )
         image_url = upload_result['secure_url']  # URL publique Cloudinary
-        public_id = upload_result.get('public_id')  # Pour suppression future si nécessaire
+        # public_id = upload_result.get('public_id')  # ← COMMENTÉ pour éviter l'erreur
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Échec de l'upload de l'image: {str(e)}")
 
     if not image_url:
         raise HTTPException(status_code=400, detail="L'image est requise")
 
-    # Créer l'objet Report
+    # Créer l'objet Report - SANS cloudinary_public_id
     db_report = models.Report(
         latitude=latitude,
         longitude=longitude,
         description=description,
         image_url=image_url,
-        cloudinary_public_id=public_id,  # nouveau champ optionnel pour Cloudinary
+        # cloudinary_public_id=public_id,  # ← SUPPRIMÉ (colonne inexistante)
         user_id=current_user.id,
         status=models.ReportStatus.PENDING
     )
@@ -1502,7 +1502,7 @@ def create_report(
     db.commit()
     db.refresh(db_report)
 
-    # ========== NOUVEAU: Calcul du score de description ==========
+    # ========== Calcul du score de description ==========
     if description:
         score = ScoringService.calculer_score_description(description)
         db_report.description_quality_score = score
@@ -1510,10 +1510,9 @@ def create_report(
         db.commit()
         db.refresh(db_report)
         print(f"SCORE DESCRIPTION - Report {db_report.id}: {score}/30")
-    # ============================================================
+    # ====================================================
 
     return db_report
-
 
 
 @router.put("/{report_id}", response_model=schemas.ReportResponse)
