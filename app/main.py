@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from datetime import datetime
 import os
 
-from database import engine, Base
+from app.services.database import engine, Base
 from models import user, report, subscription
 from api import auth, reports, users, geo, tasks, subscriptions
 from core.config import settings
