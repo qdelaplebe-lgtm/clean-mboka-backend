@@ -1464,17 +1464,26 @@ def create_report(
 ):
     """
     Signaler un déchet.
-    MODIFIÉ: Calcul automatique du score de qualité de description.
+    MODIFIÉ: Upload sur Cloudinary et calcul automatique du score de qualité de description.
     """
-    # Sauvegarder l'image
+    import cloudinary.uploader
+
+    # Générer un nom unique pour l'image
     file_extension = photo.filename.split('.')[-1] if '.' in photo.filename else 'jpg'
-    unique_filename = f"{uuid.uuid4()}.{file_extension}"
-    file_location = os.path.join(settings.UPLOAD_DIR, unique_filename)
+    unique_public_id = f"reports/{uuid.uuid4()}"
 
-    with open(file_location, "wb") as buffer:
-        shutil.copyfileobj(photo.file, buffer)
+    try:
+        # Upload sur Cloudinary
+        upload_result = cloudinary.uploader.upload(
+            photo.file,
+            public_id=unique_public_id,
+            folder="reports"
+        )
+        image_url = upload_result['secure_url']  # URL publique Cloudinary
+        public_id = upload_result.get('public_id')  # Pour suppression future si nécessaire
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Échec de l'upload de l'image: {str(e)}")
 
-    image_url = f"/static/{unique_filename}"
     if not image_url:
         raise HTTPException(status_code=400, detail="L'image est requise")
 
@@ -1484,6 +1493,7 @@ def create_report(
         longitude=longitude,
         description=description,
         image_url=image_url,
+        cloudinary_public_id=public_id,  # nouveau champ optionnel pour Cloudinary
         user_id=current_user.id,
         status=models.ReportStatus.PENDING
     )
@@ -1503,6 +1513,7 @@ def create_report(
     # ============================================================
 
     return db_report
+
 
 
 @router.put("/{report_id}", response_model=schemas.ReportResponse)
