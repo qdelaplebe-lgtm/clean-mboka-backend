@@ -25,7 +25,6 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 jours
 
     class Config:
-        env_file = ".env"
         case_sensitive = True
 
 
