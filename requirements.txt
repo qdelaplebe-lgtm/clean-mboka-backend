@@ -7,5 +7,6 @@ passlib[bcrypt]
 python-multipart
 pydantic-settings
 aiofiles
+cloudinary
 email-validator
 bcrypt==3.2.2
